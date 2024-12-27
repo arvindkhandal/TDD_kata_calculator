@@ -43,10 +43,14 @@ export const handleNumber = (value, state) => {
           ...state,
           currentValue: `${parseFloat(state.currentValue) * -1}`,
         };
+    case "percentage":
+        return {
+          ...state,
+          currentValue: `${parseFloat(state.currentValue) * 0.01}`,
+        };
       default:
         return state;
     }
   };
   
   export default calculator;
-  
