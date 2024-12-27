@@ -12,19 +12,7 @@ export const initialState = {
     calculationString: "",
     waitingForNewValue: false,
 };
-export const handleOperator = (value: string, state: State): State => {
-    const { currentValue, previousValue, operator, calculationString } = state;
-    if (operator && !state.waitingForNewValue) {
-    }
-    return {
-      ...state,
-      operator: value,
-      previousValue: currentValue,
-      waitingForNewValue: true,
-      calculationString: `${calculationString || currentValue} ${value}`,
-    };
-  };
-export const handleNumber = (value: any, state: any) => {
+export const handleNumber = (value:any, state:any) => {
     const { currentValue, calculationString, waitingForNewValue } = state;
     const updatedValue = waitingForNewValue ? `${value}` : `${currentValue}${value}`;
     const updatedCalculationString =
@@ -38,20 +26,61 @@ export const handleNumber = (value: any, state: any) => {
       waitingForNewValue: false,
     };
   };
-  const calculator = (type: any, value: any, state: any) => {
+  export const handleOperator = (value: string, state: State): State => {
+    const { currentValue, previousValue, operator, calculationString } = state;
+    if (operator && !state.waitingForNewValue) {
+      const resultState = handleEqual(state);
+      return handleOperator(value, resultState);
+    }
+    return {
+      ...state,
+      operator: value,
+      previousValue: currentValue,
+      waitingForNewValue: true,
+      calculationString: `${calculationString || currentValue} ${value}`,
+    };
+  };
+  export const handleEqual = (state:any) => {
+    const { currentValue, previousValue, operator, calculationString } = state;
+    const current = parseFloat(currentValue);
+    const previous = parseFloat(previousValue);
+    if (isNaN(previous) || isNaN(current) || !operator) {
+      return state;
+    }
+    let result;
+    if (operator === "/") {
+      result = previous / current;
+    } else if (operator === "*") {
+      result = previous * current;
+    } else if (operator === "+") {
+      result = previous + current;
+    } else if (operator === "-") {
+      result = previous - current;
+    }
+    return {
+      currentValue: `${result}`,
+      calculationString: `${calculationString} ${currentValue} = ${result}`,
+      operator: null,
+      previousValue: null,
+      waitingForNewValue: false,
+    };
+  };
+  const calculator = (type:any, value:any, state:any) => {
     switch (type) {
       case "number":
         return handleNumber(value, state);
-    case "clear":
+      case "operator":
+        return handleOperator(value, state);
+      case "equal":
+        return handleEqual(state);
+      case "clear":
         return initialState;
-    case "posneg":
+      case "posneg":
         return {
           ...state,
           currentValue: `${parseFloat(state.currentValue) * -1}`,
         };
-    case "operator":
-        return handleOperator(value, state);
-    case "percentage":
+      case "percentage":
         return {
           ...state,
           currentValue: `${parseFloat(state.currentValue) * 0.01}`,
@@ -61,4 +90,12 @@ export const handleNumber = (value: any, state: any) => {
     }
   };
   export default calculator;
-  
+
+
+
+
+
+
+
+
+
